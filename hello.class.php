@@ -10,6 +10,14 @@ class admin {
 	 */
 	private $name = '';
 	
+	/**
+	 * undocumented class variable
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $VarName;
+	
 	// this is git test
     public function say() {
         // 
