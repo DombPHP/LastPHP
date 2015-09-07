@@ -1,2 +1,2 @@
-# Warmer
-An open source application development framework for PHP
+# WarmerPHP
+An open source web application development framework for PHP
