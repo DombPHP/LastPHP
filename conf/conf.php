@@ -38,5 +38,5 @@ second.com = home
 third.com = admin
 
 ;[error]
-error_page = CORE_PATH/error/error.php
+error_page = CORE_PATH/tips/error.php
 error_message = system error

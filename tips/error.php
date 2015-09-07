@@ -43,7 +43,7 @@ li {
 	}?>
     </ul>
     <?php } ?>
-    <div style="margin-top:10px;color:#000;"><?php echo '<a href="'.LAST_LINK.'" style="text-decoration:none;" target="_blank"><b>LastPHP</a> 0.2.0</b> &nbsp;&nbsp; © 2015 LastPHP.com 版权所有'?></div>
+    <div style="margin-top:10px;color:#000;"><?php echo '<a href="javascript:void(0);" style="text-decoration:none;" target="_blank"><b>LastPHP</a> 0.2.0</b> &nbsp;&nbsp; © 2015 LastPHP.com 版权所有'?></div>
 </div>
 </body>
 </html>
