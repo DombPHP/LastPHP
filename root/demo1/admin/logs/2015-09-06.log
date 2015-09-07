@@ -1,0 +1,13 @@
+[2015-09-06 11:25:11] User warning: xxx in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 20
+[2015-09-06 11:25:12] User warning: xxx in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 20
+[2015-09-06 11:25:12] User warning: xxx in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 20
+[2015-09-06 11:25:50] User exception: 用户名错误 in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 21
+[2015-09-06 11:26:01] User exception: 用户名错误 in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 21
+[2015-09-06 11:26:01] User exception: 用户名错误 in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 21
+[2015-09-06 11:26:02] User exception: 用户名错误 in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 21
+[2015-09-06 11:26:02] User exception: 用户名错误 in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 21
+[2015-09-06 11:26:02] User exception: 用户名错误 in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 21
+[2015-09-06 11:26:02] User exception: 用户名错误 in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\controller\UserController.class.php on line 21
+[2015-09-06 11:26:29] User exception: File 'index.tpl' not found in D:\wwwroot\91wzx-old\FirstPHP\core\lib\View.class.php on line 78
+[2015-09-06 12:05:23] User exception: File 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/controller/IndexController.class.php' not found in D:\wwwroot\91wzx-old\FirstPHP\core\lib\Main.class.php on line 287
+[2015-09-06 12:06:30] User exception: File 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/controller/IndexController.class.php' not found in D:\wwwroot\91wzx-old\FirstPHP\core\lib\Main.class.php on line 287

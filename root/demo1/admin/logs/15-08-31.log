@@ -1,0 +1,28 @@
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/Index.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/Index.class.php' for inclusion (include_path='.;C:\php\pear')
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/IndexAction.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/IndexAction.class.php' for inclusion (include_path='.;C:\php\pear')
+Class 'Index' not found
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/favicon.ico.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/favicon.ico.class.php' for inclusion (include_path='.;C:\php\pear')
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/favicon.icoAction.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/favicon.icoAction.class.php' for inclusion (include_path='.;C:\php\pear')
+Class 'favicon.ico' not found
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/favicon.ico.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/favicon.ico.class.php' for inclusion (include_path='.;C:\php\pear')
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/favicon.icoAction.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/favicon.icoAction.class.php' for inclusion (include_path='.;C:\php\pear')
+Class 'favicon.ico' not found
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/Index.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/model/Index.class.php' for inclusion (include_path='.;C:\php\pear')
+include(D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/IndexAction.class.php): failed to open stream: No such file or directory
+include(): Failed opening 'D:\wwwroot\91wzx-old\FirstPHP\root\demo1/admin/action/IndexAction.class.php' for inclusion (include_path='.;C:\php\pear')
+Class 'Index' not found
+syntax error, unexpected '$this' (T_VARIABLE)
+[2015-08-31 09:43:17] Parse error syntax error, unexpected '$this' (T_VARIABLE) in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\action\userAction.class.php on line 13
+[2015-08-31 09:43:24] Parse error syntax error, unexpected '$this' (T_VARIABLE) in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\action\userAction.class.php on line 13
+[2015-08-31 09:45:39] Parse error: syntax error, unexpected '$this' (T_VARIABLE) in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\action\userAction.class.php on line 13
+[2015-08-31 09:49:57] Parse error: syntax error, unexpected '$this' (T_VARIABLE) in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\action\userAction.class.php on line 13
+[2015-08-31 09:50:02] Parse error: syntax error, unexpected '$this' (T_VARIABLE) in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\action\userAction.class.php on line 13
+[2015-08-31 09:50:03] Parse error: syntax error, unexpected '$this' (T_VARIABLE) in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\action\userAction.class.php on line 13
+[2015-08-31 09:50:03] Parse error: syntax error, unexpected '$this' (T_VARIABLE) in D:\wwwroot\91wzx-old\FirstPHP\root\demo1\admin\action\userAction.class.php on line 13
