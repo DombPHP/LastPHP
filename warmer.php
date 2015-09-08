@@ -11,7 +11,6 @@
  * Copyright (c) 2015 Michael Lee
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -31,7 +30,7 @@
  *
  * @copyright    2015 Michael Lee
  * @author       Micheal Lee <michaellee15@sina.com>
- * @lisense      The MIT License (MIT)
+ * @license      The MIT License (MIT)
  * @version      0.2.0
  */
 
@@ -59,9 +58,6 @@ class Warmer {
 		// 错误处理类
 		include CORE_PATH.'/lib/Error.class.php';
 		Error::register();
-		
-		// 定义框架网址
-		define('APP_LINK', 'http://www.WarmerPHP.com');
 		
 		 // 包含主类
 		include CORE_PATH.'/lib/Main.class.php';
