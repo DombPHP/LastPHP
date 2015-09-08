@@ -2,7 +2,7 @@
 /**
  * Warmer
  *
- * An open source application development framework for PHP
+ * An open source web application development framework for PHP
  *
  * This content is released under the MIT License (MIT)
  *
@@ -31,14 +31,16 @@
  *
  * @copyright    2015 Michael Lee
  * @author       Micheal Lee <michaellee15@sina.com>
- * @lisense      The MIT License (MIT)
+ * @license      The MIT License (MIT)
  * @version      0.2.0
  */
+
+namespace Ext;
 
 /**
  * 数据库类
  */
-class MysqliDb {
+class Mysqli {
 	/**
 	 * 数据库连接对象
 	 *
@@ -70,7 +72,7 @@ class MysqliDb {
 	 * @access public
 	 * @var MysqliDb
 	 */
-	private static $instance;
+	private static $instance = null;
 	
 	/**
 	 * 构造方法
@@ -78,7 +80,7 @@ class MysqliDb {
 	 * @param array $conf 数据库配置参数
 	 * @return void
 	 */
-	function __construct($conf) {
+	function __construct(&$conf) {
 		$host       = $conf['db_host'];
 		$port       = $conf['db_port'];
 		$db         = $conf['db_name'];
@@ -95,9 +97,9 @@ class MysqliDb {
 	 * @param array $conf 配置参数
 	 * @return Mysqli
 	 */
-	public static function getInstance($conf) {
-		if($this->instance) {
-			return $this->instance;
+	public static function getInstance(&$conf) {
+		if(self::$instance) {
+			return self::$instance;
 		} else {
 			return new self($conf);
 		}
@@ -111,12 +113,12 @@ class MysqliDb {
 	 * @return void
 	 */
 	public function connect($host, $port, $user, $pwd, $db, $charset) {
-		$this->link = new Mysqli($host, $user, $pwd, $db, $port);
+		$this->link = new \Mysqli($host, $user, $pwd, $db, $port);
 		if($this->link->connect_error) {
-			throw new Exception($this->link->connect_error);
+			throw new \Exception($this->link->connect_error);
 		}
 		if(!$this->link->set_charset($charset)) {
-			throw new Exception($this->link->error);
+			throw new \Exception($this->link->error);
 		}
 	}
 	

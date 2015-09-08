@@ -3,20 +3,7 @@
 <head>
 <title><?php echo $title;?></title>
 <style>
-* {
-	margin:0;
-	padding:0;
-	color:#656565;
-	font-size:12px;
-    font-family:tahoma,arial,"Hiragino Sans GB",宋体,sans-serif;
-}
-ul {
-	list-style:none;
-	padding:15px;
-}
-li {
-	font-size:14px;
-}
+*{margin:0;padding:0;color:#656565;font-size:12px;font-family:tahoma,arial,"Hiragino Sans GB",宋体,sans-serif;}
 #wrap{padding:15px;border:1px solid #aaa;margin:15px;box-shadow: 0 0 4px 0 #a9a9a9;border-radius:3px;}
 .label{margin-top:10px;padding:5px;background:#ffffff;/*#eaeaea;*/}
 .label span{color:#303030;font-weight:bold;font-family:Microsoft YaHei;}

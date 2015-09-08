@@ -2,7 +2,7 @@
 /**
  * Warmer
  *
- * An open source application development framework for PHP
+ * An open source web application development framework for PHP
  *
  * This content is released under the MIT License (MIT)
  *
@@ -10,7 +10,6 @@
  *
  * Copyright (c) 2015 Michael Lee
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -31,7 +30,7 @@
  *
  * @copyright    2015 Michael Lee
  * @author       Micheal Lee <michaellee15@sina.com>
- * @lisense      The MIT License (MIT)
+ * @license      The MIT License (MIT)
  * @version      0.2.0
  */
 
@@ -97,7 +96,13 @@ class View {
 	public function init() {
 		if(!$this->engine) return false;
 		$this->template = new $this->engine;
+		if(!is_dir($this->template_dir)) {
+			throw new Exception('Directory \''.$this->template_dir.'\' not found');
+		}
 		$this->template->setTemplateDir($this->template_dir);
+		if(!is_dir($this->cache_dir)) {
+			throw new Exception('Directory \''.$this->cache_dir.'\' not found');
+		}
 		$this->template->setCompileDir($this->cache_dir);
 	}
 	

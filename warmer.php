@@ -2,7 +2,7 @@
 /**
  * Warmer
  *
- * An open source application development framework for PHP
+ * An open source web application development framework for PHP
  *
  * This content is released under the MIT License (MIT)
  *
@@ -61,7 +61,7 @@ class Warmer {
 		Error::register();
 		
 		// 定义框架网址
-		define('LAST_LINK', 'http://www.Warmer.com');
+		define('APP_LINK', 'http://www.WarmerPHP.com');
 		
 		 // 包含主类
 		include CORE_PATH.'/lib/Main.class.php';

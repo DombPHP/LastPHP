@@ -222,6 +222,12 @@ abstract class AbstractModel {
 		return $this->db->get_insert_id();
 	}
 	
+	/**
+	 * 获取最后查询语句
+	 *
+	 * @access public
+	 * @return string
+	 */
 	public function getLastSql() {
 		return $this->last_query_sql;
 	}

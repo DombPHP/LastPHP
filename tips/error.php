@@ -3,20 +3,9 @@
 <head>
 <title><?php echo $error['type'];?></title>
 <style>
-* {
-	margin:0;
-	padding:0;
-	color:#656565;
-	font-size:12px;
-    font-family:tahoma,arial,"Hiragino Sans GB",宋体,sans-serif;
-}
-ul {
-	list-style:none;
-	padding:15px;
-}
-li {
-	font-size:14px;
-}
+*{margin:0;padding:0;color:#656565;font-size:12px;font-family:tahoma,arial,"Hiragino Sans GB",宋体,sans-serif;}
+ul {list-style:none;padding:15px;}
+li {font-size:14px;}
 #wrap{padding:15px;border:1px solid #aaa;margin:15px;box-shadow: 0 0 4px 0 #a9a9a9;border-radius:3px;}
 .label{margin-top:10px;padding:5px;background:#ffffff;/*#eaeaea;*/}
 .label span{color:#303030;font-weight:bold;font-family:Microsoft YaHei;}
@@ -43,7 +32,7 @@ li {
 	}?>
     </ul>
     <?php } ?>
-    <div style="margin-top:10px;color:#000;"><?php echo '<a href="javascript:void(0);" style="text-decoration:none;" target="_blank"><b>LastPHP</a> 0.2.0</b> &nbsp;&nbsp; © 2015 LastPHP.com 版权所有'?></div>
+    <div style="margin-top:10px;color:#000;">WarmerPHP 0.2.0</b> &nbsp;&nbsp; © 2015 Michael Lee 版权所有'?></div>
 </div>
 </body>
 </html>

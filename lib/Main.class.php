@@ -2,7 +2,7 @@
 /**
  * Warmer
  *
- * An open source application development framework for PHP
+ * An open source web application development framework for PHP
  *
  * This content is released under the MIT License (MIT)
  *
@@ -10,7 +10,6 @@
  *
  * Copyright (c) 2015 Michael Lee
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -31,7 +30,7 @@
  *
  * @copyright    2015 Michael Lee
  * @author       Micheal Lee <michaellee15@sina.com>
- * @lisense      The MIT License (MIT)
+ * @license      The MIT License (MIT)
  * @version      0.2.0
  */
 
@@ -85,7 +84,7 @@ class Main {
 		$module = '';
 		if(!defined('PROJECT')) {
 			if($_tmp_conf['map_domain_name']==1) {
-				$project_map = self::dns($_tmp_conf);
+				$project_map = self::map($_tmp_conf);
 				if(!empty($project_map)) {
 					$project_map = explode(':', $project_map);
 					$project = $project_map[0];
@@ -114,9 +113,13 @@ class Main {
 		define('APP_PATH', PROJECT_PATH.PROJECT);
 		
 		// 加载项目配置文件并合并配置文件
-		$_user_conf = self::load_user_conf();
-		$_conf = array_merge($_tmp_conf, $_user_conf);
+		$_pro_conf = self::load_pro_conf();
+		$_conf = array_merge($_tmp_conf, $_pro_conf);
 		$GLOBALS['CONF'] = $_conf;
+		
+		// 加载函数文件
+		self::load_site_func();
+		self::load_pro_func();
 		
 		// 定义错误页面文件
 		if(isset($_conf['error_page'])&&!empty($_conf['error_page'])) {
@@ -147,17 +150,17 @@ class Main {
 		define('TEMPLATE_DIR', APP_PATH.'/view/'.($theme?$theme:'').'/'.$module.'/');
 		
 		// 定义模板缓存目录
-		define('CACHE_DIR', realpath(str_replace('CORE_PATH', CORE_PATH, str_replace('SCRIPT_PATH', SCRIPT_PATH, str_replace('APP_PATH', APP_PATH, $_conf['cache_dir'])))));
+		define('CACHE_DIR', str_replace('CORE_PATH', CORE_PATH, str_replace('SCRIPT_PATH', SCRIPT_PATH, str_replace('APP_PATH', APP_PATH, $_conf['cache_dir']))));
 		
 		// 加载框架核心文件
 		self::load_sys_file();
 		
 		// 注册自动加载器
 		include CORE_PATH.'/lib/Autoloader.class.php';
-		spl_autoload_register("Autoloader::autoload");
+		Autoloader::register();
 		
 		// 设置输出编码
-		$charset = isset($_conf['charset'])&&trim($_conf['charset'])?$_conf['charset']:'utf-8';
+		$charset = isset($_conf['charset']) && trim($_conf['charset']) ? $_conf['charset'] : 'utf-8';
 		header('Content-type:text/html;charset='.$charset);
 		
 		// 调用模块控制器方法
@@ -179,11 +182,15 @@ class Main {
 		$method  = 'index';
 		if($query_string) {
 			parse_str($QUERY_STRING, $parameters);
-			$project = isset($parameters['p'])&&$parameters['p']?$parameters['p']:$project;
-			$module  = isset($parameters['m'])&&$parameters['m']?$parameters['m']:$module;
-			$method  = isset($parameters['a'])&&$parameters['m']?$parameters['a']:$method;
+			if(isset($parameters['p']) && $parameters['p']) {
+				$project = $parameters['p'];
+				if(!preg_match ("/^[a-z]/i", $project)) {
+					throw  new Exception('Project \''.$project.'\' not found');
+				}
+			}
+			$module  = isset($parameters['m']) && $parameters['m'] ? $parameters['m'] : $module;
+			$method  = isset($parameters['a']) && $parameters['m'] ? $parameters['a'] : $method;
 		}
-		
 		if(!empty($_SERVER['PATH_INFO'])) {
 			$path_info = trim($_SERVER['PATH_INFO']);
 			if(substr($path_info, 0, 1)=='/') {
@@ -193,19 +200,23 @@ class Main {
 			$path_info = explode(SEPERATOR,$path_info);
 			$_GET['__vars__'] = $path_info;
 			if(defined('PROJECT')) {
+				$project = PROJECT;
 				if(defined('MODULE')) {
-					$method = isset($path_info[0])&&$path_info[0]?$path_info[0]:$method;
+					$method = isset($path_info[0]) && $path_info[0] ? $path_info[0] : $method;
 				} else {
-					$module = isset($path_info[0])&&$path_info[0]?$path_info[0]:$module;
-					$method = isset($path_info[1])&&$path_info[1]?$path_info[1]:$method;
+					$module = isset($path_info[0]) && $path_info[0] ? $path_info[0] : $module;
+					$method = isset($path_info[1]) && $path_info[1] ? $path_info[1] : $method;
 				}
 			} else {
-				$project = isset($path_info[0])&&$path_info[0]?$path_info[0]:$project;
-				$module  = isset($path_info[1])&&$path_info[1]?$path_info[1]:$module;
-				$method  = isset($path_info[2])&&$path_info[2]?$path_info[2]:$method;
+				$project = isset($path_info[0]) && $path_info[0] ? $path_info[0] : $project;
+				$module  = isset($path_info[1]) && $path_info[1] ? $path_info[1] : $module;
+				$method  = isset($path_info[2]) && $path_info[2] ? $path_info[2] : $method;
+			}
+			if(!preg_match ("/^[a-z]/i", $project)) {
+				throw  new Exception('Project \''.$project.'\' not found');
 			}
 		}
-		return array('project'=>strtolower($project), 'module'=>ucwords($module), 'method'=>$method);
+		return array('project' => strtolower($project), 'module' => $module, 'method' => $method);
 	}
 	
 	/**
@@ -242,12 +253,40 @@ class Main {
 	 * @access private
 	 * @return array
 	 */
-	private static function load_user_conf() {
+	private static function load_pro_conf() {
 		$conf_path = APP_PATH.'/conf/conf.php';
 		if(is_file($conf_path)) {
 			return array_change_key_case(parse_ini_file($conf_path, true), CASE_LOWER);
 		}
 		return array();
+	}
+	
+	/**
+	 * 加载站点函数文件
+	 *
+	 * @static
+	 * @access private
+	 * @return void
+	 */
+	private static function load_site_func() {
+		$func_path = APP_PATH.'/func/func.php';
+		if(is_file($func_path)) {
+			include $func_path;
+		}
+	}
+	
+	/**
+	 * 加载项目函数文件
+	 *
+	 * @static
+	 * @access private
+	 * @return void
+	 */
+	private static function load_pro_func() {
+		$func_path = APP_PATH.'/func/func.php';
+		if(is_file($func_path)) {
+			include $func_path;
+		}
 	}
 	
 	/**
@@ -259,30 +298,12 @@ class Main {
 	 */
 	private static function load_sys_file() {
 		$autoLoadDir = array(
-			CORE_PATH.'/func/common.php',
-			CORE_PATH.'/lib/MysqliDb.class.php',
+			CORE_PATH.'/func/func.php',
 			CORE_PATH.'/lib/Controller.class.php',
-			CORE_PATH.'/lib/AbstractModel.class.php',
-			CORE_PATH.'/lib/Model.class.php',
 			CORE_PATH.'/lib/View.class.php',
 			CORE_PATH.'/lib/iTemplate.class.php',
-			CORE_PATH.'/lib/Template.class.php',
 		);
 		self::require_all($autoLoadDir);
-	}
-	
-	/**
-	 * 映射项目名称
-	 * 
-	 * @static
-	 * @access private
-	 * @param string $project 项目名称
-	 * @param array $conf 配置参数
-	 * @return string
-	 */
-	private static function map($project, $conf) {
-		$map_name = 'map_'.$project;
-		return isset($conf[$map_name])?trim($conf[$map_name]):$project;
 	}
 	
 	/**
@@ -294,7 +315,7 @@ class Main {
 	 * @param array $conf 配置参数
 	 * @return void
 	 */
-	private static function dns($conf) {
+	private static function map($conf) {
 		$host = $_SERVER['HTTP_HOST'];
 		return isset($conf[$host])?trim($conf[$host]):'';
 	}

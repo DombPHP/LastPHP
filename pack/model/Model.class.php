@@ -34,6 +34,8 @@
  * @version      0.2.0
  */
 
+include 'AbstractModel.class.php';
+
 /**
  * 框架数据模型类
  */
