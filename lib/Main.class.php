@@ -81,7 +81,6 @@ class Main {
 		define('PROJECT_PATH', realpath($project_path).'/');
 		
 		// 处理域名映射
-		$module = '';
 		if(!defined('PROJECT')) {
 			if($_tmp_conf['map_domain_name']==1) {
 				$project_map = self::map($_tmp_conf);
@@ -89,7 +88,7 @@ class Main {
 					$project_map = explode(':', $project_map);
 					$project = $project_map[0];
 					if(isset($project_map[1])) {
-						$module = $project_map[1];
+						define('MODULE', ucwords($project_map[1]));
 					}
 					define('PROJECT', $project);
 				}			
@@ -98,16 +97,13 @@ class Main {
 		
 		// 解析网址参数
 		$_info = self::_parse($_tmp_conf);
-		$project = $_info['project'];
 		
 		// 定义模块名称和方法名称
-		$module = $module ? $module : $_info['module'];
-		$method = $_info['method'];
-		define('MODULE', ucwords($module));
-		define('METHOD', $method);
+		defined('MODULE') or define('MODULE', ucwords($_info['module']));
+		define('METHOD', $_info['method']);
 		
 		// 定义项目名称
-		defined('PROJECT') or define('PROJECT', $project);
+		defined('PROJECT') or define('PROJECT', $_info['project']);
 		
 		// 定义项目路径
 		define('APP_PATH', PROJECT_PATH.PROJECT);
@@ -147,7 +143,7 @@ class Main {
 		define('TEMPLATE_ENGINE', $engine);
 		
 		// 定义模板目录
-		define('TEMPLATE_DIR', APP_PATH.'/view/'.($theme?$theme:'').'/'.$module.'/');
+		define('TEMPLATE_DIR', APP_PATH.'/view/'.($theme?$theme:'').'/'.MODULE.'/');
 		
 		// 定义模板缓存目录
 		define('CACHE_DIR', str_replace('CORE_PATH', CORE_PATH, str_replace('SCRIPT_PATH', SCRIPT_PATH, str_replace('APP_PATH', APP_PATH, $_conf['cache_dir']))));
@@ -164,7 +160,7 @@ class Main {
 		header('Content-type:text/html;charset='.$charset);
 		
 		// 调用模块控制器方法
-		self::locator($module, $method);
+		self::locator(MODULE, METHOD);
 	}
 	
 	/**
@@ -340,7 +336,7 @@ class Main {
 		$class = $module.'Controller';
 		if(!class_exists($class)) {
 			$empty_path = APP_PATH.'/controller/EmptyController.class.php';
-			if(file_exists($empty_path)) {
+			if(is_file($empty_path)) {
 				include $empty_path;
 				if(class_exists('EmptyController')) {
 					$class = 'EmptyController';

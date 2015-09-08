@@ -34,6 +34,7 @@ map_admin = admin2
 ;[domain map]
 map_domain_name = on
 first.com = admin:User
+one.first.com = home:user
 second.com = home
 third.com = admin
 

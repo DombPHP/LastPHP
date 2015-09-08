@@ -118,6 +118,9 @@ class View {
 			return $this->get_include_contents($file, $this->vars);
 		}
 		$file = ($file?$file:$this->file).'.'.$this->template_suffix;
+		if(!is_file($this->template_dir.$file)) {
+			throw new Exception('File \''.$this->template_dir.$file.'\' not found');
+		}
 		if($this->template) {
 			$this->template->assign($this->vars);
 			return $this->template->fetch($file);

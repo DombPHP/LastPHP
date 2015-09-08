@@ -32,7 +32,7 @@ li {font-size:14px;}
 	}?>
     </ul>
     <?php } ?>
-    <div style="margin-top:10px;color:#000;">WarmerPHP 0.2.0</b> &nbsp;&nbsp; © 2015 Michael Lee 版权所有'?></div>
+    <div style="margin-top:10px;color:#000;">WarmerPHP 0.2.0</b> &nbsp;&nbsp; © 2015 Michael Lee 版权所有</div>
 </div>
 </body>
 </html>
