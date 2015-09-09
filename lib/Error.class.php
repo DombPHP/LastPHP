@@ -129,7 +129,7 @@ class Error {
 	 * @access public
 	 * @return void
 	 */
-	public static function exceptionHandler($e) {
+	public static function exceptionHandler($e) {die('xx');
 		self::_errorPage($e);
 	}
 	
@@ -241,7 +241,7 @@ class Error {
 				$strArgs = '';
 				if(isset($val['args'])) {
 					array_walk($val['args'], 'self::walk');
-					$strArgs = implode(',',$val['args']);
+					$strArgs = implode(',', $val['args']);
 				}
 				if(isset($val['class'])) {
 					$str .= ' '.$val['class'].$val['type'].$val['function'].'('.$strArgs.')';

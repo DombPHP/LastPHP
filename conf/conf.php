@@ -1,6 +1,8 @@
 <?php exit;?>
 ;ini configure file
 charset = utf-8
+suffix = html
+seperator = /
 
 ;[database]
 db_host = localhost
@@ -9,10 +11,6 @@ db_name = test
 db_user = root
 db_pwd = 123456
 db_charset = utf8
-
-;[url]
-suffix = html
-seperator = /
 
 ;[template]
 template_suffix = tpl
@@ -34,7 +32,7 @@ map_admin = admin2
 ;[domain map]
 map_domain_name = on
 first.com = admin:User
-one.first.com = home:user
+one.first.com = home
 second.com = home
 third.com = admin
 

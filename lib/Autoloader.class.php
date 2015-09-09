@@ -125,7 +125,7 @@ class Autoloader {
 			// Model后缀导入
 			if(substr($class_name,-5)=='Model') {
 				if(file_exists($file = APP_PATH.'/model/'.$class_name.'.class.php')) {
-					include($file);
+					include $file;
 					return ;
 				}
 			}
@@ -133,7 +133,7 @@ class Autoloader {
 			// Action后缀导入
 			if(substr($class_name,-10)=='Controller') {
 				if(file_exists($file = APP_PATH.'/controller/'.$class_name.'.class.php')) {
-					include($file);
+					include $file;
 					return ;
 				}
 			}
@@ -141,14 +141,14 @@ class Autoloader {
 			// Ext后缀导入
 			if(substr($class_name,-3)=='Ext') {
 				if(is_file($file = CORE_PATH.'/ext/'.$class_name.'.class.php')) {
-					include($file);
+					include $file;
 					return ;
 				}
 			}
 			
 			// 无后缀直接导入包
 			if(is_file($file = CORE_PATH.'/pack/'.$class_name.'.class.php')) {
-				include($file);
+				include $file;
 				return ;
 			}
 		}

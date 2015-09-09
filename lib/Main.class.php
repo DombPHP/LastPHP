@@ -70,6 +70,10 @@ class Main {
 		// 合并配置文件
 		$_tmp_conf  = array_merge($_core_conf, $_site_conf);
 		
+		// 设置默认时区
+		$timezone = isset($_tmp_conf['date_default_timezone']) && !empty($_tmp_conf['date_default_timezone']) ? $_tmp_conf['date_default_timezone'] : 'Asia/Shanghai';
+		date_default_timezone_set($timezone);
+		
 		// 定义网址分割字符
 		defined('SEPERATOR') or define('SEPERATOR',isset($_tmp_conf['seperator'])&&$_tmp_conf['seperator']?$_tmp_conf['seperator']:'/');
 		
@@ -118,7 +122,7 @@ class Main {
 		self::load_pro_func();
 		
 		// 定义错误页面文件
-		if(isset($_conf['error_page'])&&!empty($_conf['error_page'])) {
+		if(isset($_conf['error_page']) && !empty($_conf['error_page'])) {
 			defined('ERROR_PAGE') or define('ERROR_PAGE', str_replace('CORE_PATH', CORE_PATH, str_replace('SCRIPT_PATH', SCRIPT_PATH, str_replace('APP_PATH', APP_PATH, $_conf['error_page']))));
 			
 		}
@@ -127,15 +131,11 @@ class Main {
 			defined('ERROR_MESSAGE') or define('ERROR_MESSAGE', $_conf['error_message']);
 		}
 		
-		// 设置默认时区
-		$timezone = isset($_conf['date_default_timezone']) && !empty($_conf['date_default_timezone']) ? $_conf['date_default_timezone'] : 'Asia/Shanghai';
-		date_default_timezone_set($timezone);
-		
 		// 定义主题
 		$theme  = isset($_conf['theme'])?$_conf['theme']:'default';
 		
 		// 定义模板后缀
-		$suffix = isset($_conf['template_suffix'])&&!empty($_conf['template_suffix'])?$_conf['template_suffix']:'tpl';
+		$suffix = isset($_conf['template_suffix']) && !empty($_conf['template_suffix']) ? $_conf['template_suffix'] : 'tpl';
 		define('TEMPLATE_SUFFIX', $suffix);
 		
 		// 定义模板引擎名称
@@ -160,7 +160,7 @@ class Main {
 		header('Content-type:text/html;charset='.$charset);
 		
 		// 调用模块控制器方法
-		self::locator(MODULE, METHOD);
+		self::locator(MODULE, METHOD, $_info['params']);
 	}
 	
 	/**
@@ -176,25 +176,25 @@ class Main {
 		$project = 'home';
 		$module  = 'Index';
 		$method  = 'index';
+		$params  = array();
 		if($query_string) {
-			parse_str($QUERY_STRING, $parameters);
-			if(isset($parameters['p']) && $parameters['p']) {
-				$project = $parameters['p'];
+			parse_str($query_string, $params);
+			if(isset($params['p']) && $params['p']) {
+				$project = $params['p'];
 				if(!preg_match ("/^[a-z]/i", $project)) {
 					throw  new Exception('Project \''.$project.'\' not found');
 				}
 			}
-			$module  = isset($parameters['m']) && $parameters['m'] ? $parameters['m'] : $module;
-			$method  = isset($parameters['a']) && $parameters['m'] ? $parameters['a'] : $method;
+			$module  = isset($params['m']) && $params['m'] ? $params['m'] : $module;
+			$method  = isset($params['a']) && $params['m'] ? $params['a'] : $method;
 		}
+		$params = array();
 		if(!empty($_SERVER['PATH_INFO'])) {
-			$path_info = trim($_SERVER['PATH_INFO']);
+			$path_info = preg_replace('/\.'.SUFFIX.'$/is', '', $_SERVER['PATH_INFO']);
 			if(substr($path_info, 0, 1)=='/') {
 				$path_info = substr($path_info, 1);
 			}
-			$path_info = preg_replace('/\.'.SUFFIX.'$/is','',$path_info);
-			$path_info = explode(SEPERATOR,$path_info);
-			$_GET['__vars__'] = $path_info;
+			$path_info = explode(SEPERATOR, $path_info);
 			if(defined('PROJECT')) {
 				$project = PROJECT;
 				if(defined('MODULE')) {
@@ -211,8 +211,18 @@ class Main {
 			if(!preg_match ("/^[a-z]/i", $project)) {
 				throw  new Exception('Project \''.$project.'\' not found');
 			}
+			if(stripos($module, '-')!==false) {
+				$vars = self::_parse_str($module, 'mo');
+				$module = $vars['mo'];
+				$method = $vars['me'];
+				$params = $vars['vars'];
+			} else if(stripos($method, '-')!==false) {
+				$vars = self::_parse_str($method);
+				$method = $vars['me'];
+				$params = $vars['vars'];
+			}
 		}
-		return array('project' => strtolower($project), 'module' => $module, 'method' => $method);
+		return array('project' => strtolower($project), 'module' => $module, 'method' => $method, 'params' => $params);
 	}
 	
 	/**
@@ -326,7 +336,7 @@ class Main {
 	 * @param array $conf 配置参数
 	 * @return void
 	 */
-	public static function locator($module = '', $method = '') {
+	public static function locator($module = '', $method = '', $params = array()) {
 		$module_path = APP_PATH.'/controller/'.$module.'Controller.class.php';
 		if(is_file($module_path)) {
 			include $module_path;
@@ -352,7 +362,9 @@ class Main {
 			call_user_func(array($class, $method));
 		} else {
 			if(method_exists($class, '_empty')) {
-				call_user_func(array($class, '_empty'), $method);
+				$params[0] = $method;
+				ksort($params);
+				call_user_func_array(array($class, '_empty'), $params);
 			} else {
 				throw new Exception('Method \''.$method.'\' not found');
 			}
@@ -390,5 +402,29 @@ class Main {
 	           self::_require($file);
 	       }
 	    }
+	}
+	
+	/**
+	 * 解析由短横线(-)连接的字符串
+	 *
+	 * @static
+	 * @access private
+	 * @param string $str 字符串
+	 * @param string $m 解析类型(mo:按模块解析,me:按方法解析)
+	 * @return array
+	 */
+	private static function _parse_str($str, $m = 'me') {
+		$vars = explode('-', $str);
+		if($m == 'mo') {
+			$array['mo'] = $vars[0];
+			$array['me'] = $vars[1];
+			unset($vars[0]);
+			unset($vars[1]);
+		} else {
+			$array['me'] = $vars[0];
+			unset($vars[0]);
+		}
+		$array['vars'] = $vars;
+		return $array;
 	}
 }
