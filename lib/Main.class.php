@@ -86,7 +86,7 @@ class Main {
 		
 		// 处理域名映射
 		if(!defined('PROJECT')) {
-			if($_tmp_conf['map_domain_name']==1) {
+			if($_tmp_conf['map_domain']==1) {
 				$project_map = self::map($_tmp_conf);
 				if(!empty($project_map)) {
 					$project_map = explode(':', $project_map);
@@ -337,15 +337,22 @@ class Main {
 	 * @return void
 	 */
 	public static function locator($module = '', $method = '', $params = array()) {
-		$module_path = APP_PATH.'/controller/'.$module.'Controller.class.php';
+		$module_dir = APP_PATH.'/controller/';
+		$module_path = $module_dir.$module.'Controller.class.php';
 		if(is_file($module_path)) {
 			include $module_path;
 		} else {
-			throw new Exception('File \''.$module_path.'\' not found');
+			$module = str_replace(' ', '', ucwords(str_replace('_', ' ', $module)));
+			$module_path = $module_dir.$module.'Controller.class.php';
+			if(is_file($module_path)) {
+				include $module_path;
+			} else {
+				throw new Exception('File \''.$module_path.'\' not found');
+			}
 		}
 		$class = $module.'Controller';
 		if(!class_exists($class)) {
-			$empty_path = APP_PATH.'/controller/EmptyController.class.php';
+			$empty_path = $module_dir.'EmptyController.class.php';
 			if(is_file($empty_path)) {
 				include $empty_path;
 				if(class_exists('EmptyController')) {

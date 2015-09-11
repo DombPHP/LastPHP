@@ -81,14 +81,18 @@ class Error {
 	 * @return void
 	 */
 	public static function errorHandler($errno, $errstr, $errfile, $errline) {
-		if(!(error_reporting() & $errno)) {
-			return;
-		}
+		$error = array('code' => $errno, 'message' => $errstr, 'file' => $errfile, 'line' => $errline);
 		switch($errno) {
+			case E_USER_ERROR:
 			case E_WARNING:
 			case E_NOTICE:
 			case E_USER_WARNING:
 			case E_USER_NOTICE:
+			case E_RECOVERABLE_ERROR:
+				self::log(self::parseMessage($error));
+				if(DEBUG) {
+					break;
+				}
 			case E_STRICT:
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
@@ -96,7 +100,10 @@ class Error {
 					return;
 				}
 		}
-		throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+		if(!(error_reporting() & $errno)) {
+			return;
+		}
+		self::_errorPage($error);
 	}
 	
 	/**
@@ -117,6 +124,8 @@ class Error {
 				case E_ERROR:
 				case E_USER_ERROR:
 					ob_end_clean();
+					$e['code'] = $e['type'];
+					self::log(self::parseMessage($e));
 					self::_errorPage($e);
 			}
 		}
@@ -129,8 +138,10 @@ class Error {
 	 * @access public
 	 * @return void
 	 */
-	public static function exceptionHandler($e) {die('xx');
-		self::_errorPage($e);
+	public static function exceptionHandler($e) {
+		$error = self::_exceptionToArray($e);
+		self::log(self::parseMessage($error));
+		self::_errorPage($error);
 	}
 	
 	/**
@@ -143,18 +154,12 @@ class Error {
 	 */
 	private static function _errorPage($e) {
 		if(is_object($e)){
-			$error['code'] = $e->getCode();
-			$error['file'] = $e->getFile();
-			$error['line'] = $e->getLine();
-			$error['message'] = $e->getMessage();
-			$error['trace'] = self::parseTraces($e->getTrace());
+			$error = self::_exceptionToArray($e);
 		}else{
 			$e['trace'] = array();
 			$error = $e;
-			$error['code'] = $e['type'];
 		}
 		$error['type'] = self::getErrorType($error['code']);
-		self::log(self::parseMessage($error));
 		if(DEBUG===false) {
 			$error['message'] = defined('ERROR_MESSAGE') ? ERROR_MESSAGE : self::$error_message;				
 			unset($error['trace']);
@@ -266,6 +271,24 @@ class Error {
 	 */
 	private static function walk(&$item,$key){
 		$item = var_export($item, true);
+	}
+	
+	/**
+	 * 异常对象转化成数组
+	 *
+	 * @static
+	 * @access private
+	 * @param object $e 异常对象
+	 * @return void
+	 */
+	private static function _exceptionToArray($e) {
+		$error = array();
+		$error['code'] = $e->getCode();
+		$error['file'] = $e->getFile();
+		$error['line'] = $e->getLine();
+		$error['message'] = $e->getMessage();
+		$error['trace'] = self::parseTraces($e->getTrace());
+		return $error;
 	}
 	
 	/**

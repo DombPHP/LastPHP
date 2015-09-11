@@ -34,17 +34,46 @@
  * @version      0.2.0
  */
 
-/**
- * 包含Smarty类
- */
-include CORE_PATH.'/pack/smarty-3.1.27/libs/Smarty.class.php';
+namespace Ext;
 
 /**
- * 扩展Smarty类
+ * 数据库类
  */
-class SmartyExt extends Smarty implements iTemplate {
+class MultiMysqli extends Mysqli {
+	/**
+	 * 数据库连接资源对象
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $links = array();
+	private static $instance = null;
 	
-	public function __construct() {
-		parent::__construct();
+	public function __construct($conf) {
+		parent::__construct($conf);
+	}
+	
+	/**
+	 * 获取类实例
+	 *
+	 * @access public
+	 * @param array $conf 配置参数
+	 * @return MultiMysqli
+	 */
+	public static function getInstance(&$conf) {
+		$no = md5(serialize($conf));
+		if(self::$instance && self::$instance instanceof self) {
+			if(self::$instance->links[$no]) {print_r(self::$instance->links);
+				self::$instance->link = &self::$instance->links[$no];
+			} else {
+				self::$instance->connect($conf);
+				self::$instance->links[$no] = self::$instance->link;
+			}
+			return self::$instance;
+		} else {
+			self::$instance = new self($conf);
+			self::$instance->links[$no] = self::$instance->link;
+			return self::$instance;
+		}
 	}
 }

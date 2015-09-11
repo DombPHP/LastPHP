@@ -34,85 +34,59 @@
  * @version      0.2.0
  */
 
-include 'AbstractModel.class.php';
+include 'WarmerMultiModel.class.php';
 
 /**
- * 框架数据模型类
+ * Warmer多数据库数据模型类
  */
-class Model extends AbstractModel {
+class WarmerDistributedModel extends WarmerMultiModel {
 	
-	/**
-	 * 查询一条记录
-	 *
-	 * @access public
-	 * @param string $fields 数据字段
-	 * @param string $cond 查询条件
-	 * @param string $order 排序
-	 * @return array
-	 */
-	public function find($fields='', $cond='', $order='') {
-		$sql = $this->_parse_find($fields, $cond,$order);
-		return $this->query($sql);
+	protected $master = '';
+	protected $slave = '';
+	protected $conf = null;
+	
+	public function __construct($conf) {
+		$this->checkddb($conf);
+		$this->conf = &$conf;
+		parent::__construct($conf);
 	}
 	
-	/**
-	 * 添加数据
-	 *
-	 * @access public
-	 * @param array $data 添加的数据
-	 * @return integer
-	 */
-	public function add($data) {
-		$sql = $this->_parse_add($data);
-		$this->execute($sql);
-		return $this->last_insert_id();
+	protected function checkddb($conf) {
+		$ddb = isset($conf['ddb']) ? $conf['ddb'] : 0;
+		$proxy = isset($conf['proxy']) ? $conf['proxy'] : 0;
+		if($ddb) {
+			if($proxy) {
+				$this->master = $this->master ? $this->master : 'db_host_master';
+				$this->slave = $this->slave ? $this->slave : self::_getServer($conf);
+			} else {
+				$this->slave = self::_getServer($conf, 'servers');
+				$this->master = $this->slave;
+			}
+		}
 	}
 	
-	/**
-	 * 修改数据
-	 *
-	 * @access public
-	 * @param array $data 新数据
-	 * @param string $cond 执行条件
-	 * @return integer
-	 */
-	public function edit($data, $cond) {
-		$sql = $this->_parse_edit($data, $cond);
-		return $this->execute($sql);
+	private function _getServer($conf, $flag = 'slaves') {
+		$servers = isset($conf[$flag]) && $conf[$flag] ? $conf[$flag] : null;
+		if($servers) {
+			$servers = explode(',', $servers);
+			$count = count($servers);
+			$rnd = rand(0, $count-1);
+			return $servers[$rnd];
+		}
+		throw new Exception('Database server not found');
 	}
 	
-	/**
-	 * 修改数据
-	 *
-	 * @access public
-	 * @param array $data 新数据
-	 * @param string $cond 执行条件
-	 * @return integer
-	 */
-	public function update($data, $cond) {
-		return $this->edit($data, $cond);
+	public function query($sql) {
+		$this->host = $this->slave;
+		$_conf = $this->checkHost($this->conf);
+		$this->db = \Ext\MultiMysqli::getInstance($_conf);
+		return parent::query($sql);
 	}
 	
-	/**
-	 * 删除数据记录
-	 *
-	 * @access public
-	 * @param string $cond 执行条件
-	 * @return integer
-	 */
-	public function delete($cond) {
-		$sql = $this->_parse_delete($cond);
-		return $this->execute($sql);
-	}
-	
-	/**
-	 * 查询数据
-	 *
-	 * @access public
-	 * 
-	 * @return array
-	 */
-	public function select($sql) {
-		return $this->query($sql);
+	public function execute($sql) {
+		$this->host = $this->master;
+		$_conf = $this->checkHost($this->conf);
+		$this->db = \Ext\MultiMysqli::getInstance($_conf);
+		return parent::execute($sql);
 	}
 }

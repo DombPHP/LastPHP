@@ -117,9 +117,16 @@ class View {
 		if(is_file($file)) {
 			return $this->get_include_contents($file, $this->vars);
 		}
+		
+		// 参数为空则使用方法名作为文件名
 		$file = ($file?$file:$this->file).'.'.$this->template_suffix;
 		if(!is_file($this->template_dir.$file)) {
-			throw new Exception('File \''.$this->template_dir.$file.'\' not found');
+			// 将文件名转化为小写
+			$file2 = strtolower($file);
+			if($file==$file2 || !is_file($this->template_dir.$file)) {
+				// 文件不存在则抛出异常
+				throw new Exception('File \''.$this->template_dir.$file.'\' not found');
+			}
 		}
 		if($this->template) {
 			$this->template->assign($this->vars);

@@ -34,17 +34,49 @@
  * @version      0.2.0
  */
 
-/**
- * 包含Smarty类
- */
-include CORE_PATH.'/pack/smarty-3.1.27/libs/Smarty.class.php';
+include 'WarmerModel.class.php';
 
 /**
- * 扩展Smarty类
+ * Warmer多数据库数据模型类
  */
-class SmartyExt extends Smarty implements iTemplate {
+class WarmerMultiModel extends WarmerModel {
 	
-	public function __construct() {
-		parent::__construct();
+	protected $host = '';
+	protected $pre = 'db_host_';
+	
+	public function __construct($conf) {
+		$_conf = $this->checkHost($conf);
+		if($this->db===null) {
+			$this->db = \Ext\MultiMysqli::getInstance($_conf);
+		}
+		parent::__construct($_conf);
+	}
+	
+	protected function checkHost($conf) {
+		$index = '';
+		if(!empty($this->host)) {
+			if(stristr($this->host, $this->pre)===false) {
+				$index = '_'.$this->host;
+				$host = $this->pre.$this->host;
+			} else {
+				$index = '_'.substr($this->host, 8);
+				$host = $this->host;
+			}
+		} else {
+			$host = 'db_host';
+		}
+		$_conf = array();
+		if(isset($conf[$host])) {
+			$_conf['db_host']   = $conf['db_host'.$index];
+			$_conf['db_port']    = $conf['db_port'.$index];
+			$_conf['db_name']   = $conf['db_name'.$index];
+			$_conf['db_user']   = $conf['db_user'.$index];
+			$_conf['db_pwd']    = $conf['db_pwd'.$index];
+			$_conf['db_charset']    = $conf['db_charset'.$index];
+			$_conf['db_prefix'] = $conf['db_prefix'.$index];
+		} else {
+			throw  new Exception('Server \''.$host.'\' not found');
+		}
+		return $_conf;
 	}
 }

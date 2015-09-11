@@ -41,12 +41,12 @@ namespace Ext;
  */
 class Mysqli {
 	/**
-	 * 数据库连接对象
+	 * 数据库连接资源对象
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $link;
+	protected $link;
 	
 	/**
 	 * Mysqli_result
@@ -54,7 +54,7 @@ class Mysqli {
 	 * @access private
 	 * @var Mysqli_result
 	 */
-	private $result;
+	protected $result;
 	
 	/**
 	 * 最后插入记录ID
@@ -62,7 +62,7 @@ class Mysqli {
 	 * @access private
 	 * @var integer
 	 */
-	private $insert_id = 0;
+	protected $insert_id = 0;
 	
 	/**
 	 * 静态类实例
@@ -79,14 +79,8 @@ class Mysqli {
 	 * @param array $conf 数据库配置参数
 	 * @return void
 	 */
-	function __construct(&$conf) {
-		$host       = $conf['db_host'];
-		$port       = $conf['db_port'];
-		$db         = $conf['db_name'];
-		$user       = $conf['db_user'];
-		$pwd        = $conf['db_pwd'];
-		$charset    = $conf['db_charset'];
-		$this->connect($host, $port, $user, $pwd, $db, $charset);
+	public function __construct(&$conf) {
+		$this->connect($conf);
 	}
 	
 	/**
@@ -97,11 +91,22 @@ class Mysqli {
 	 * @return Mysqli
 	 */
 	public static function getInstance(&$conf) {
-		if(self::$instance) {
+		if(self::$instance && self::$instance instanceof self) {
 			return self::$instance;
 		} else {
-			return new self($conf);
+			self::$instance = new self($conf);
+			return self::$instance;
 		}
+	}
+	
+	public function connect($conf) {
+		$host       = $conf['db_host'];
+		$port       = $conf['db_port'];
+		$db         = $conf['db_name'];
+		$user       = $conf['db_user'];
+		$pwd        = $conf['db_pwd'];
+		$charset    = $conf['db_charset'];
+		$this->_connect($host, $port, $user, $pwd, $db, $charset);
 	}
 	
 	/**
@@ -111,7 +116,7 @@ class Mysqli {
 	 * @param string 
 	 * @return void
 	 */
-	public function connect($host, $port, $user, $pwd, $db, $charset) {
+	private function _connect($host, $port, $user, $pwd, $db, $charset) {
 		$this->link = new \Mysqli($host, $user, $pwd, $db, $port);
 		if($this->link->connect_error) {
 			throw new \Exception($this->link->connect_error);
@@ -131,9 +136,9 @@ class Mysqli {
 	 * @return array
 	 */
 	public function query($sql) {
-		$this->result = $this->link->query($sql);
+		$this->result = $this->_query($sql);
 		if(is_object($this->result)) {
-			return $this->_fetchAll($this->result); 
+			return $this->_fetchAll($this->result);
 		} else {
 			return array();
 		}
@@ -147,9 +152,54 @@ class Mysqli {
 	 * @return integer
 	 */
 	public function execute($sql) {
-		$this->link->query($sql);
+		$this->_query($sql);
 		$this->insert_id = $this->link->insert_id;
 		return $this->link->affected_rows();
+	}
+	
+	/**
+	 * 执行查询语句
+	 *
+	 * @access private
+	 * @param string $sql 查询语句
+	 * @return mixed
+	 */
+	private function _query($sql) {
+		$result = $this->link->query($sql);
+		if($this->link->errno) {
+			trigger_error($this->link->error.'; SQL:'.$sql);
+		}
+		return $result;
+	}
+	
+	/**
+	 * 开始事务
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function begin() {
+		return $this->link->begin_transaction();
+	}
+	
+	/**
+	 * 提交事务
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function commit() {
+		return $this->link->commit();
+	}
+	
+	/**
+	 * 回滚事务
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function rollback() {
+		return $this->link->rollback();
 	}
 	
 	/**
@@ -171,7 +221,7 @@ class Mysqli {
 	 */
 	private function _fetchAll($result) {
 		$rows = array();
-		while($row = $result>fetch_assoc()) {
+		while($row = $result->fetch_assoc()) {
 			$rows[] = $row;
 		}
 		return $rows;

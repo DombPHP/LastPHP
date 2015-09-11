@@ -35,16 +35,16 @@
  */
 
 /**
- * 包含Smarty类
+ * 包含WarmerModel类
  */
-include CORE_PATH.'/pack/smarty-3.1.27/libs/Smarty.class.php';
+include CORE_PATH.'/pack/WarmerModel/WarmerMultiModel.class.php';
 
 /**
- * 扩展Smarty类
+ * 扩展WarmerModel类
  */
-class SmartyExt extends Smarty implements iTemplate {
-	
+class WarmerMultiModelExt extends WarmerMultiModel {
+
 	public function __construct() {
-		parent::__construct();
+		parent::__construct($GLOBALS['CONF']);
 	}
 }

@@ -55,7 +55,7 @@ class Controller {
 		$this->view = new View();
 		
 		// 设置模板文件名,默认文件名为方法名
-		$this->view->setFile(METHOD);
+		$this->view->setFile(strtolower(METHOD));
 		
 		// 设置模板引擎
 		$this->view->setTemplateEngine(TEMPLATE_ENGINE);
