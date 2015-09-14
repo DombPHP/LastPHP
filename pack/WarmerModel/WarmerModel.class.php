@@ -37,7 +37,7 @@
 include 'AbstractWarmerModel.class.php';
 
 /**
- * 框架数据模型类
+ * 数据模型基类
  */
 class WarmerModel extends AbstractWarmerModel {
 	
@@ -48,6 +48,8 @@ class WarmerModel extends AbstractWarmerModel {
 	 * @param string $fields 数据字段
 	 * @param string $cond 查询条件
 	 * @param string $order 排序
+	 * @param string $group 分组
+	 * @param string $having 筛选条件
 	 * @return array
 	 */
 	public function find($fields = '', $cond = '', $order = '', $group = '', $having = '') {
@@ -124,6 +126,38 @@ class WarmerModel extends AbstractWarmerModel {
 	public function select($fields = '', $cond = '', $order = '', $rows = 0, $page = 0, $group = '', $having = '') {
 		$sql = $this->_parse_select($fields, $cond, $order, $rows, $page, $group, $having);
 		return $this->query($sql);
+	}
+	
+	/**
+	 * 设置字段值
+	 *
+	 * @access public
+	 * @param string $field 数据字段
+	 * @param string $value 字段值
+	 * @param string $cond 执行条件
+	 * @return integer
+	 */
+	public function setField($field, $value, $cond = '') {
+		return $this->edit(array($field => $value), $cond);
+	}
+	
+	/**
+	 * 查询字段值
+	 *
+	 * @access public
+	 * @param string $field 数据字段
+	 * @param string $cond 查询条件
+	 * @param string $order 排序
+	 * @param string $group 分组
+	 * @param string $having 筛选条件
+	 * @return array
+	 */
+	public function getField($field, $cond = '', $order = '', $group = '', $having = '') {
+		if(is_numeric($cond)) {
+			$cond = $this->pk.'=\''.$cond.'\'';
+		}
+		$data = $this->find($field, $cond , $order, $group, $having);
+		return $data[$field];
 	}
 	
 	/**
@@ -235,7 +269,7 @@ class WarmerModel extends AbstractWarmerModel {
 	 * @return integer
 	 */
 	public function dec($field, $cond = '', $offset = 0) {
-		$sql = $this->_parse_dec($field, $cond, $offset);
+		$sql = $this->_parse_dec($field, $cond, $offset); 
 		return $this->execute($sql);
 	}
 	

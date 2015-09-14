@@ -37,7 +37,7 @@
 namespace Ext;
 
 /**
- * 数据库类
+ * 单数据库连接类
  */
 class Mysqli {
 	/**
@@ -80,7 +80,7 @@ class Mysqli {
 	 * @return void
 	 */
 	public function __construct(&$conf) {
-		$this->connect($conf);
+		$this->conf = $conf;
 	}
 	
 	/**
@@ -106,7 +106,7 @@ class Mysqli {
 		$user       = $conf['db_user'];
 		$pwd        = $conf['db_pwd'];
 		$charset    = $conf['db_charset'];
-		$this->_connect($host, $port, $user, $pwd, $db, $charset);
+		return $this->_connect($host, $port, $user, $pwd, $db, $charset);
 	}
 	
 	/**
@@ -124,6 +124,7 @@ class Mysqli {
 		if(!$this->link->set_charset($charset)) {
 			throw new \Exception($this->link->error);
 		}
+		return $this->link;
 	}
 	
 	/**
@@ -164,7 +165,8 @@ class Mysqli {
 	 * @param string $sql 查询语句
 	 * @return mixed
 	 */
-	private function _query($sql) {
+	protected function _query($sql) {
+		$this->connect($this->conf);		
 		$result = $this->link->query($sql);
 		if($this->link->errno) {
 			trigger_error($this->link->error.'; SQL:'.$sql);

@@ -76,7 +76,7 @@ abstract class AbstractWarmerModel {
 	 * @access protected
 	 * @var string
 	 */
-	 protected $last_query_sql = '';
+	protected $last_query_sql = '';
 	
 	/**
 	 * 构造方法
@@ -100,7 +100,7 @@ abstract class AbstractWarmerModel {
 			}
 		}
 		if($this->db===null) {
-			$this->db = \Ext\Mysqli::getInstance($conf);		
+			$this->db = \Ext\Mysqli::getInstance($conf);
 		}
 	}
 	
@@ -112,9 +112,6 @@ abstract class AbstractWarmerModel {
 	 * @return string
 	 */
 	protected function _parse_add($data) {
-		if(!isset($data[$this->pk])) {
-			$data[$this->pk] = null;
-		}
 		$sql = 'INSERT INTO '.$this->real_table_name;
 		foreach($data as $key => $val) {
 			$fields[] = $key;
@@ -123,26 +120,42 @@ abstract class AbstractWarmerModel {
 		$fields = implode(',', $fields);
 		$values = implode(',', $values);
 		$sql .= '('.$fields.')';
-		$sql .= ' values('.$values.');';
+		$sql .= ' VALUES('.$values.');';
 		return $sql;
 	}
 	
 	/**
-	 * 解析编辑语句
+	 * 解析更新语句
 	 *
 	 * @access protected
 	 * @param string $data 编辑数据
 	 * @param string $cond 编辑条件
 	 * @return string
 	 */
-	protected function _parse_edit($data, $cond) {
-		$sql = 'UPDATE '.$this->real_table_name.' set ';
+	protected function _parse_edit($data, $cond = '') {
+		$sql = 'UPDATE '.$this->real_table_name.' SET ';
+		if(empty($cond)) {
+			if(isset($data[$this->pk])) {
+				$cond = $this->pk.'='.$data[$this->pk];
+				unset($data[$this->pk]);
+			}
+		} else {
+			if(isset($data[$this->pk])) {
+				unset($data[$this->pk]);
+			}
+			if(is_numeric($cond)) {
+				$cond = $this->pk.'=\''.$cond.'\'';
+			} else if(is_array($cond)) {
+				$cond = $this->pk.' in(\''.implode('\',\'', $cond).'\')';
+			} else if(strpos($cond, ',')) {
+				$cond = $this->pk.' in('.$cond.')';
+			}
+		}
 		foreach($data as $key => $val) {
 			$s .= $key.'='.$val.',';
 		}
 		$s = substr($s, 0, -1);
-		$sql .= $s.' where '.$cond;
-		return $sql;
+		return $sql.$s.($cond ? ' WHERE '.$cond : '');
 	}
 	
 	/**
@@ -153,7 +166,14 @@ abstract class AbstractWarmerModel {
 	 * @return string
 	 */
 	protected function _parse_delete($cond) {
-		$sql = 'DELETE FROM '.$this->real_table_name.' where '.$cond;
+		if(is_numeric($cond)) {
+			$cond = $this->pk.'=\''.$cond.'\'';
+		} else if(is_array($cond)) {
+			$cond = $this->pk.' in(\''.implode('\',\'', $cond).'\')';
+		} else if(strpos($cond, ',')) {
+			$cond = $this->pk.' in('.$cond.')';
+		}
+		$sql = 'DELETE FROM '.$this->real_table_name.' WHERE '.$cond;
 		return $sql;
 	}
 	
@@ -355,6 +375,27 @@ abstract class AbstractWarmerModel {
 	 */
 	public function getLastSql() {
 		return $this->last_query_sql;
+	}
+	
+	/**
+	 * 设置主键名称
+	 *
+	 * @access public
+	 * @param string $pk 主键名称
+	 * @return void
+	 */
+	public function setPk($pk) {
+		$this->pk = $pk;
+	}
+	
+	/**
+	 * 获取主键名称
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function getPk() {
+		return $this->pk;
 	}
 	
 	/**

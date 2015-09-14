@@ -41,39 +41,61 @@ include 'WarmerModel.class.php';
  */
 class WarmerMultiModel extends WarmerModel {
 	
+	/**
+	 * 数据库服务器配置项名称
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $host = '';
-	protected $pre = 'db_host_';
 	
+	/**
+	 * 构造方法
+	 *
+	 * @access public
+	 * @param array $conf 配置参数
+	 * return void
+	 */
 	public function __construct($conf) {
 		$_conf = $this->checkHost($conf);
 		if($this->db===null) {
 			$this->db = \Ext\MultiMysqli::getInstance($_conf);
 		}
+		$this->db->setConf($_conf);
 		parent::__construct($_conf);
 	}
 	
-	protected function checkHost($conf) {
+	/**
+	 * 获取服务器配置信息
+	 *
+	 * @access protected
+	 * @param array $conf 配置参数
+	 * @return array
+	 */
+	protected function checkHost($conf, $host = null) {
+		$pre = 'db_host_';
 		$index = '';
-		if(!empty($this->host)) {
-			if(stristr($this->host, $this->pre)===false) {
-				$index = '_'.$this->host;
-				$host = $this->pre.$this->host;
+		$host = $host ? $host : $this->host;
+		if(!empty($host) && $host!='db_host') {
+			if(stristr($host, $pre)===false) {
+				$index = '_'.$host;
+				$host = $pre.$host;
 			} else {
-				$index = '_'.substr($this->host, 8);
-				$host = $this->host;
+				$index = '_'.substr($host, 8);
+				$host = $host;
 			}
 		} else {
 			$host = 'db_host';
 		}
 		$_conf = array();
 		if(isset($conf[$host])) {
-			$_conf['db_host']   = $conf['db_host'.$index];
-			$_conf['db_port']    = $conf['db_port'.$index];
-			$_conf['db_name']   = $conf['db_name'.$index];
-			$_conf['db_user']   = $conf['db_user'.$index];
-			$_conf['db_pwd']    = $conf['db_pwd'.$index];
-			$_conf['db_charset']    = $conf['db_charset'.$index];
-			$_conf['db_prefix'] = $conf['db_prefix'.$index];
+			$_conf['db_host']      = $conf['db_host'.$index];
+			$_conf['db_port']      = $conf['db_port'.$index];
+			$_conf['db_name']      = $conf['db_name'.$index];
+			$_conf['db_user']      = $conf['db_user'.$index];
+			$_conf['db_pwd']       = $conf['db_pwd'.$index];
+			$_conf['db_charset']   = $conf['db_charset'.$index];
+			$_conf['db_prefix']    = $conf['db_prefix'.$index];
 		} else {
 			throw  new Exception('Server \''.$host.'\' not found');
 		}

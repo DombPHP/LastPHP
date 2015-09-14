@@ -37,17 +37,24 @@
 namespace Ext;
 
 /**
- * 数据库类
+ * 多数据库连接类
  */
 class MultiMysqli extends Mysqli {
 	/**
-	 * 数据库连接资源对象
+	 * 数据库连接资源对象数组
 	 *
 	 * @access private
 	 * @var string
 	 */
 	private $links = array();
-	private static $instance = null;
+	
+	/**
+	 * 静态类实例
+	 *
+	 * @access private
+	 * @var MultiMysqli
+	 */
+	private static $instance;
 	
 	public function __construct($conf) {
 		parent::__construct($conf);
@@ -61,19 +68,56 @@ class MultiMysqli extends Mysqli {
 	 * @return MultiMysqli
 	 */
 	public static function getInstance(&$conf) {
-		$no = md5(serialize($conf));
 		if(self::$instance && self::$instance instanceof self) {
-			if(self::$instance->links[$no]) {print_r(self::$instance->links);
-				self::$instance->link = &self::$instance->links[$no];
-			} else {
-				self::$instance->connect($conf);
-				self::$instance->links[$no] = self::$instance->link;
-			}
 			return self::$instance;
 		} else {
 			self::$instance = new self($conf);
-			self::$instance->links[$no] = self::$instance->link;
 			return self::$instance;
 		}
+	}
+	
+	/**
+	 * 多数据库连接方法
+	 *
+	 * @access public
+	 * @param array 配置参数
+	 * @return void
+	 */
+	public function multiConnect($conf) {
+		$no = md5(serialize($conf));
+		if(isset($this->links[$no])) {
+			$this->link = $this->links[$no];
+			return $this->links[$no];
+		} else {
+			$this->link = $this->connect($conf);
+			$this->links[$no] = $this->link;
+		}
+	}
+	
+	/**
+	 * 执行查询语句
+	 *
+	 * @access private
+	 * @param string $sql 查询语句
+	 * @return mixed
+	 */
+	protected function _query($sql) {
+		$this->multiConnect($this->conf);
+		$result = $this->link->query($sql);
+		if($this->link->errno) {
+			trigger_error($this->link->error.'; SQL:'.$sql);
+		}
+		return $result;
+	}
+	
+	/**
+	 * 设置配置参数
+	 *
+	 * @access public
+	 * @param array $conf 配置参数
+	 * @return void
+	 */
+	public function setConf($conf) {
+		$this->conf = $conf;
 	}
 }

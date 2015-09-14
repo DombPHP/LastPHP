@@ -37,34 +37,87 @@
 include 'WarmerMultiModel.class.php';
 
 /**
- * Warmer多数据库数据模型类
+ * Warmer分布式数据模型类
  */
 class WarmerDistributedModel extends WarmerMultiModel {
 	
+	/**
+	 * 主服务器
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $master = '';
-	protected $slave = '';
-	protected $conf = null;
 	
+	/**
+	 * 从服务器
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $slave = '';
+	
+	/**
+	 * 主服务器配置参数
+	 *
+	 * @access protected
+	 * @var array
+	 */
+	protected $master_conf;
+	
+	/**
+	 * 从服务器配置参数
+	 *
+	 * @access protected
+	 * @var array
+	 */
+	protected $slave_conf;
+	
+	/**
+	 * 构造方法
+	 *
+	 * @access public
+	 * @param array $conf 配置参数
+	 * @return void
+	 */
 	public function __construct($conf) {
 		$this->checkddb($conf);
-		$this->conf = &$conf;
 		parent::__construct($conf);
 	}
 	
+	/**
+	 * 检查数据库配置信息
+	 *
+	 * @access protected
+	 * @param array $conf 配置参数
+	 * @return void
+	 */
 	protected function checkddb($conf) {
 		$ddb = isset($conf['ddb']) ? $conf['ddb'] : 0;
 		$proxy = isset($conf['proxy']) ? $conf['proxy'] : 0;
 		if($ddb) {
 			if($proxy) {
-				$this->master = $this->master ? $this->master : 'db_host_master';
-				$this->slave = $this->slave ? $this->slave : self::_getServer($conf);
+				$this->master = $this->master ? $this->master : isset($conf['master']) ? $conf['master'] : 'db_host_master';
+				$this->slave  = $this->slave ? $this->slave : self::_getServer($conf);
+				$this->master_conf = $this->checkHost($conf, $this->master);
+				$this->slave_conf  = $this->checkHost($conf, $this->slave);
 			} else {
-				$this->slave = self::_getServer($conf, 'servers');
+				$this->slave  = self::_getServer($conf, 'servers');
 				$this->master = $this->slave;
+				$this->master_conf = $this->checkHost($conf, $this->master);
+				$this->slave_conf  = $this->master_conf;
 			}
 		}
 	}
 	
+	/**
+	 * 随机获取服务器信息
+	 *
+	 * @access private
+	 * @param array $conf 配置参数
+	 * @param string $flag 标识
+	 * @return void
+	 */
 	private function _getServer($conf, $flag = 'slaves') {
 		$servers = isset($conf[$flag]) && $conf[$flag] ? $conf[$flag] : null;
 		if($servers) {
@@ -76,17 +129,27 @@ class WarmerDistributedModel extends WarmerMultiModel {
 		throw new Exception('Database server not found');
 	}
 	
+	/**
+	 * 重写query方法
+	 *
+	 * @access pubbic
+	 * @param string $sql 查询语句
+	 * @return array+
+	 */
 	public function query($sql) {
-		$this->host = $this->slave;
-		$_conf = $this->checkHost($this->conf);
-		$this->db = \Ext\MultiMysqli::getInstance($_conf);
+		$this->db->setConf($this->slave_conf);
 		return parent::query($sql);
 	}
 	
+	/**
+	 * 重写execute方法
+	 *
+	 * @access public
+	 * @param string $sql 查询语句
+	 * @return integer
+	 */
 	public function execute($sql) {
-		$this->host = $this->master;
-		$_conf = $this->checkHost($this->conf);
-		$this->db = \Ext\MultiMysqli::getInstance($_conf);
+		$this->db->setConf($this->master_conf);
 		return parent::execute($sql);
 	}
 }
