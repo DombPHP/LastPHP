@@ -100,7 +100,7 @@ abstract class AbstractWarmerModel {
 			}
 		}
 		if($this->db===null) {
-			$this->db = \Ext\Mysqli::getInstance($conf);
+			$this->db = \Micsqli\Mysqli::getInstance($conf);
 		}
 	}
 	

@@ -34,7 +34,7 @@
  * @version      0.2.0
  */
 
-namespace Ext;
+namespace Micsqli;
 
 /**
  * 单数据库连接类

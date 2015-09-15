@@ -34,71 +34,90 @@
  * @version      0.2.0
  */
 
-include 'WarmerModel.class.php';
+namespace Micsqli;
 
 /**
- * Warmer多数据库数据模型类
+ * 多数据库连接类
  */
-class WarmerMultiModel extends WarmerModel {
-	
+class Proxy extends MultiMysqli {
 	/**
-	 * 数据库服务器配置项名称
+	 * 数据库连接资源对象数组
 	 *
-	 * @access protected
+	 * @access private
 	 * @var string
 	 */
-	protected $host = '';
+	private $links = array();
 	
 	/**
-	 * 构造方法
+	 * 静态类实例
 	 *
-	 * @access public
-	 * @param array $conf 配置参数
-	 * return void
+	 * @access private
+	 * @var MultiMysqli
 	 */
+	private static $instance;
+	
 	public function __construct($conf) {
-		$_conf = $this->checkHost($conf);
-		if($this->db===null) {
-			$this->db = \Micsqli\MultiMysqli::getInstance($_conf);
-		}
-		$this->db->setConf($_conf);
-		parent::__construct($_conf);
+		parent::__construct($conf);
 	}
 	
 	/**
-	 * 获取服务器配置信息
+	 * 获取类实例
 	 *
-	 * @access protected
+	 * @access public
 	 * @param array $conf 配置参数
-	 * @return array
+	 * @return MultiMysqli
 	 */
-	protected function checkHost($conf, $host = null) {
-		$pre = 'db_host_';
-		$index = '';
-		$host = $host ? $host : $this->host;
-		if(!empty($host) && $host!='db_host') {
-			if(stristr($host, $pre)===false) {
-				$index = '_'.$host;
-				$host = $pre.$host;
-			} else {
-				$index = '_'.substr($host, 8);
-				$host = $host;
-			}
+	public static function getInstance(&$conf) {
+		if(self::$instance && self::$instance instanceof self) {
+			return self::$instance;
 		} else {
-			$host = 'db_host';
+			self::$instance = new self($conf);
+			return self::$instance;
 		}
-		$_conf = array();
-		if(isset($conf[$host])) {
-			$_conf['db_host']      = $conf['db_host'.$index];
-			$_conf['db_port']      = $conf['db_port'.$index];
-			$_conf['db_name']      = $conf['db_name'.$index];
-			$_conf['db_user']      = $conf['db_user'.$index];
-			$_conf['db_pwd']       = $conf['db_pwd'.$index];
-			$_conf['db_charset']   = $conf['db_charset'.$index];
-			$_conf['db_prefix']    = $conf['db_prefix'.$index];
+	}
+	
+	/**
+	 * 多数据库连接方法
+	 *
+	 * @access public
+	 * @param array 配置参数
+	 * @return void
+	 */
+	public function multiConnect($conf) {
+		$no = md5(serialize($conf));
+		if(isset($this->links[$no])) {
+			$this->link = $this->links[$no];
+			return $this->links[$no];
 		} else {
-			throw  new Exception('Server \''.$host.'\' not found');
+			$this->link = $this->connect($conf);
+			$this->links[$no] = $this->link;
 		}
-		return $_conf;
+	}
+	
+	/**
+	 * 执行查询语句
+	 *
+	 * @access private
+	 * @param string $sql 查询语句
+	 * @return mixed
+	 */
+	protected function _query($sql) {
+		$this->multiConnect($this->conf);
+		$result = $this->link->query($sql);
+		if($this->link->errno) {
+			trigger_error($this->link->error.'; SQL:'.$sql);
+		}
+		return $result;
+	}
+	
+	/**
+	 * 设置配置参数
+	 *
+	 * @access public
+	 * @param array $conf 配置参数
+	 * @return void
+	 */
+	public function setConf($conf) {
+		$this->conf = $conf;
 	}
 }
