@@ -6,7 +6,7 @@ seperator = /
 
 ;[database]
 ddb = on
-proxy = off
+proxy = on
 master = db_host
 slaves = db_host_1,db_host_2,db_host_3
 servers = db_host,db_host_1,db_host_2,db_host_3

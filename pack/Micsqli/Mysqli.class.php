@@ -79,7 +79,7 @@ class Mysqli {
 	 * @param array $conf 数据库配置参数
 	 * @return void
 	 */
-	public function __construct(&$conf) {
+	public function __construct(&$conf = null) {
 		$this->conf = $conf;
 	}
 	
@@ -98,6 +98,8 @@ class Mysqli {
 			return self::$instance;
 		}
 	}
+	
+	protected function __clone() {}
 	
 	public function connect($conf) {
 		$host       = $conf['db_host'];

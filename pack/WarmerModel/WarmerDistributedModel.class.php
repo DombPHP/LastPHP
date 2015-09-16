@@ -98,11 +98,11 @@ class WarmerDistributedModel extends WarmerMultiModel {
 		if($ddb) {
 			if($proxy) {
 				$this->master = $this->master ? $this->master : isset($conf['master']) ? $conf['master'] : 'db_host_master';
-				$this->slave  = $this->slave ? $this->slave : self::_getServer($conf);
+				$this->slave  = $this->slave ? $this->slave : $this->_getServer($conf);
 				$this->master_conf = $this->checkHost($conf, $this->master);
 				$this->slave_conf  = $this->checkHost($conf, $this->slave);
 			} else {
-				$this->slave  = self::_getServer($conf, 'servers');
+				$this->slave  = $this->_getServer($conf, 'servers');
 				$this->master = $this->slave;
 				$this->master_conf = $this->checkHost($conf, $this->master);
 				$this->slave_conf  = $this->master_conf;

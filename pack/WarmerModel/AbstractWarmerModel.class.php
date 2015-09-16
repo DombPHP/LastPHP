@@ -39,6 +39,14 @@
  */
 abstract class AbstractWarmerModel {
 	/**
+	 * 数据库主机名称
+	 *
+	 * @ access protected
+	 * @var string
+	 */
+	protected $host;
+	
+	/**
 	 * 数据表名
 	 *
 	 * @ access protected
@@ -100,7 +108,8 @@ abstract class AbstractWarmerModel {
 			}
 		}
 		if($this->db===null) {
-			$this->db = \Micsqli\Mysqli::getInstance($conf);
+			$conf = $this->host ? $this->host : $conf;
+			$this->db = MultiMysqliExt::getInstance($conf);
 		}
 	}
 	

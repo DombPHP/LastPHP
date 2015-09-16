@@ -37,14 +37,15 @@
 /**
  * 包含WarmerModel类
  */
-include CORE_PATH.'/pack/WarmerModel/WarmerDistributedModel.class.php';
+include CORE_PATH.'/pack/Micsqli/MultiMysqli.class.php';
 
 /**
  * 扩展WarmerModel类
  */
-class WarmerDistributedModelExt extends WarmerDistributedModel {
+class MultiMysqliExt extends \Micsqli\MultiMysqli {
 
-	public function __construct() {
-		parent::__construct($GLOBALS['CONF']);
+	public function __construct($conf) {
+		$this->global_conf = $GLOBALS['CONF'];
+		parent::__construct($conf);
 	}
 }

@@ -47,6 +47,7 @@ class MultiMysqli extends Mysqli {
 	 * @var string
 	 */
 	private $links = array();
+	private $current_host_name = '';
 	
 	/**
 	 * 静态类实例
@@ -55,11 +56,7 @@ class MultiMysqli extends Mysqli {
 	 * @var MultiMysqli
 	 */
 	private static $instance;
-	
-	public function __construct($conf) {
-		parent::__construct($conf);
-	}
-	
+		
 	/**
 	 * 获取类实例
 	 *
@@ -77,6 +74,30 @@ class MultiMysqli extends Mysqli {
 	}
 	
 	/**
+	 * 获取服务器配置信息
+	 *
+	 * @access protected
+	 * @param array $conf 配置参数
+	 * @return array
+	 */
+	protected function checkHost($conf, $host = null) {
+		$_conf = array();
+		$index = '_'.substr($host, 8);
+		if(isset($conf[$host])) {
+			$_conf['db_host']      = $conf['db_host'.$index];
+			$_conf['db_port']      = $conf['db_port'.$index];
+			$_conf['db_name']      = $conf['db_name'.$index];
+			$_conf['db_user']      = $conf['db_user'.$index];
+			$_conf['db_pwd']       = $conf['db_pwd'.$index];
+			$_conf['db_charset']   = $conf['db_charset'.$index];
+			$_conf['db_prefix']    = $conf['db_prefix'.$index];
+		} else {
+			throw  new Exception('Server \''.$host.'\' not found');
+		}print_r($_conf);
+		return $_conf;
+	}
+	
+	/**
 	 * 多数据库连接方法
 	 *
 	 * @access public
@@ -84,6 +105,9 @@ class MultiMysqli extends Mysqli {
 	 * @return void
 	 */
 	public function multiConnect($conf) {
+		if(is_string($conf)) {
+			$conf = $this->checkHost($this->global_conf, $conf);
+		}
 		$no = md5(serialize($conf));
 		if(isset($this->links[$no])) {
 			$this->link = $this->links[$no];
@@ -120,4 +144,15 @@ class MultiMysqli extends Mysqli {
 	public function setConf($conf) {
 		$this->conf = $conf;
 	}
+	
+	/**
+	 * 设置配置参数
+	 *
+	 * @access public
+	 * @param array $conf 配置参数
+	 * @return void
+	 */
+	public function setGlobalConf($conf) {
+		$this->global_conf = $conf;
+	}	
 }

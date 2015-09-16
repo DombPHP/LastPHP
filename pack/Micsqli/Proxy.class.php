@@ -37,16 +37,24 @@
 namespace Micsqli;
 
 /**
- * 多数据库连接类
+ * 数据库代理类
  */
 class Proxy extends MultiMysqli {
 	/**
-	 * 数据库连接资源对象数组
+	 * 主数据库配置参数
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $links = array();
+	private $master_conf = array();
+	
+	/**
+	 * 从数据库配置参数
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $slave_conf = array();
 	
 	/**
 	 * 静态类实例
@@ -57,6 +65,7 @@ class Proxy extends MultiMysqli {
 	private static $instance;
 	
 	public function __construct($conf) {
+		$this->checkddb($conf);
 		parent::__construct($conf);
 	}
 	
@@ -65,7 +74,7 @@ class Proxy extends MultiMysqli {
 	 *
 	 * @access public
 	 * @param array $conf 配置参数
-	 * @return MultiMysqli
+	 * @return Proxy
 	 */
 	public static function getInstance(&$conf) {
 		if(self::$instance && self::$instance instanceof self) {
@@ -77,47 +86,74 @@ class Proxy extends MultiMysqli {
 	}
 	
 	/**
-	 * 多数据库连接方法
+	 * 检查数据库配置信息
 	 *
-	 * @access public
-	 * @param array 配置参数
-	 * @return void
-	 */
-	public function multiConnect($conf) {
-		$no = md5(serialize($conf));
-		if(isset($this->links[$no])) {
-			$this->link = $this->links[$no];
-			return $this->links[$no];
-		} else {
-			$this->link = $this->connect($conf);
-			$this->links[$no] = $this->link;
-		}
-	}
-	
-	/**
-	 * 执行查询语句
-	 *
-	 * @access private
-	 * @param string $sql 查询语句
-	 * @return mixed
-	 */
-	protected function _query($sql) {
-		$this->multiConnect($this->conf);
-		$result = $this->link->query($sql);
-		if($this->link->errno) {
-			trigger_error($this->link->error.'; SQL:'.$sql);
-		}
-		return $result;
-	}
-	
-	/**
-	 * 设置配置参数
-	 *
-	 * @access public
+	 * @access protected
 	 * @param array $conf 配置参数
 	 * @return void
 	 */
-	public function setConf($conf) {
-		$this->conf = $conf;
+	protected function checkddb($conf) {
+		$ddb = isset($conf['ddb']) ? $conf['ddb'] : 0;
+		$proxy = isset($conf['proxy']) ? $conf['proxy'] : 0;
+		if($ddb==1) {
+			if($proxy==1) {
+				$this->master = $this->master ? $this->master : isset($conf['master']) ? $conf['master'] : 'db_host_master';
+				$this->slave  = $this->slave ? $this->slave : $this->getServer($conf);
+				$this->master_conf = $this->checkHost($conf, $this->master);
+				$this->slave_conf  = $this->checkHost($conf, $this->slave);
+			} else {
+				$this->slave  = $this->getServer($conf, 'servers');
+				$this->master = $this->slave;
+				$this->master_conf = $this->checkHost($conf, $this->master);
+				$this->slave_conf  = $this->master_conf;
+			}
+		}
+	}
+	
+	/**
+	 * 随机获取服务器信息
+	 *
+	 * @access private
+	 * @param array $conf 配置参数
+	 * @param string $flag 标识
+	 * @return void
+	 */
+	protected function getServer($conf) {
+		$servers = isset($conf[$flag]) && $conf[$flag] ? $conf[$flag] : null;
+		if($servers) {
+			$servers = explode(',', $servers);
+			$count = count($servers);
+			$rnd = rand(0, $count-1);
+			return $servers[$rnd];
+		}
+		throw new Exception('Database server not found');
+	}
+	
+	/**
+	 * 重写query方法
+	 *
+	 * @access pubbic
+	 * @param string $sql 查询语句
+	 * @return array
+	 */
+	public function query($sql) {
+		if($this->slave_conf) {
+			$this->conf = $this->slave_conf;
+		}
+		return parent::query($sql);
+	}
+	
+	/**
+	 * 重写execute方法
+	 *
+	 * @access public
+	 * @param string $sql 查询语句
+	 * @return integer
+	 */
+	public function execute($sql) {
+		if($this->master_conf) {
+			$this->conf = $this->master_conf;			
+		}
+		return parent::execute($sql);
 	}
 }

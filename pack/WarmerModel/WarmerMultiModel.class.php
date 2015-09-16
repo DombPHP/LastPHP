@@ -59,7 +59,7 @@ class WarmerMultiModel extends WarmerModel {
 	public function __construct($conf) {
 		$_conf = $this->checkHost($conf);
 		if($this->db===null) {
-			$this->db = \Micsqli\MultiMysqli::getInstance($_conf);
+			$this->db = MultiMysqliExt::getInstance($_conf);
 		}
 		$this->db->setConf($_conf);
 		parent::__construct($_conf);
