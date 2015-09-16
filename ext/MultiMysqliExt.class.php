@@ -35,17 +35,49 @@
  */
 
 /**
- * 包含WarmerModel类
+ * 包含MultiMysqli类
  */
 include CORE_PATH.'/pack/Micsqli/MultiMysqli.class.php';
 
 /**
- * 扩展WarmerModel类
+ * 扩展MultiMysqli类
  */
 class MultiMysqliExt extends \Micsqli\MultiMysqli {
 
-	public function __construct($conf) {
+	/**
+	 * 静态类实例
+	 *
+	 * @static
+	 * @access private
+	 * @var MultiMysqliExt
+	 */
+	private static $instance = null;
+	
+	/**
+	 * 构造方法
+	 *
+	 * @access public
+	 * @param mixed $conf 配置参数
+	 * @return void
+	 */
+	public function __construct($conf = null) {
 		$this->global_conf = $GLOBALS['CONF'];
 		parent::__construct($conf);
+	}
+	
+	/**
+	 * 获取类实例
+	 *
+	 * @access public
+	 * @param array $conf 配置参数
+	 * @return MultiMysqli
+	 */
+	public static function getInstance($conf = null) {
+		if(self::$instance && self::$instance instanceof self) {
+			return self::$instance;
+		} else {
+			self::$instance = new self($conf);
+			return self::$instance;
+		}
 	}
 }

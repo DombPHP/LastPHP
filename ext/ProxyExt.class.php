@@ -34,71 +34,50 @@
  * @version      0.2.0
  */
 
-include 'WarmerModel.class.php';
+/**
+ * 包含Proxy类
+ */
+include CORE_PATH.'/pack/Micsqli/Proxy.class.php';
 
 /**
- * Warmer多数据库数据模型类
+ * 扩展Proxy类
  */
-class WarmerMultiModel extends WarmerModel {
-	
+class ProxyExt extends \Micsqli\Proxy {
+
 	/**
-	 * 数据库服务器配置项名称
+	 * 静态类实例
 	 *
-	 * @access protected
-	 * @var string
+	 * @static
+	 * @access private
+	 * @var ProxyExt
 	 */
-	protected $host = '';
+	private static $instance = null;
 	
 	/**
 	 * 构造方法
 	 *
 	 * @access public
-	 * @param array $conf 配置参数
-	 * return void
+	 * @param mixed $conf 配置参数
+	 * @return void
 	 */
-	public function __construct($conf) {
-		$_conf = $this->checkHost($conf);
-		if($this->db===null) {
-			$this->db = MultiMysqliExt::getInstance($_conf);
-		}
-		$this->db->setConf($_conf);
-		parent::__construct($_conf);
+	public function __construct($conf = null) {
+		$this->global_conf = $GLOBALS['CONF'];
+		parent::__construct($conf);
 	}
 	
 	/**
-	 * 获取服务器配置信息
+	 * 获取类实例
 	 *
-	 * @access protected
+	 * @access public
 	 * @param array $conf 配置参数
-	 * @return array
+	 * @return MultiMysqli
 	 */
-	protected function checkHost($conf, $host = null) {
-		$pre = 'db_host_';
-		$index = '';
-		$host = $host ? $host : $this->host;
-		if(!empty($host) && $host!='db_host') {
-			if(stristr($host, $pre)===false) {
-				$index = '_'.$host;
-				$host = $pre.$host;
-			} else {
-				$index = '_'.substr($host, 8);
-				$host = $host;
-			}
+	public static function getInstance($conf = null) {
+		if(self::$instance && self::$instance instanceof self) {
+			return self::$instance;
 		} else {
-			$host = 'db_host';
+			self::$instance = new self($conf);
+			return self::$instance;
 		}
-		$_conf = array();
-		if(isset($conf[$host])) {
-			$_conf['db_host']      = $conf['db_host'.$index];
-			$_conf['db_port']      = $conf['db_port'.$index];
-			$_conf['db_name']      = $conf['db_name'.$index];
-			$_conf['db_user']      = $conf['db_user'.$index];
-			$_conf['db_pwd']       = $conf['db_pwd'.$index];
-			$_conf['db_charset']   = $conf['db_charset'.$index];
-			$_conf['db_prefix']    = $conf['db_prefix'.$index];
-		} else {
-			throw  new Exception('Server \''.$host.'\' not found');
-		}
-		return $_conf;
 	}
 }
