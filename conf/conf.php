@@ -8,7 +8,7 @@ seperator = /
 ddb = on
 proxy = on
 master = db_host
-slaves = db_host_1,db_host_2,db_host_3
+slaves = db_host_1,db_host_2
 servers = db_host,db_host_1,db_host_2,db_host_3
 db_host = localhost
 db_port = 3306
@@ -20,7 +20,7 @@ db_prefix = zx_
 
 db_host_1 = localhost
 db_port_1 = 3306
-db_name_1 = test
+db_name_1 = 9191zx
 db_user_1 = root
 db_pwd_1 = 123456
 db_charset_1 = utf8
@@ -28,7 +28,7 @@ db_prefix_1 = zx_1
 
 db_host_2 = localhost
 db_port_2 = 3306
-db_name_2 = test
+db_name_2 = hospital
 db_user_2 = root
 db_pwd_2 = 123456
 db_charset_2 = utf8

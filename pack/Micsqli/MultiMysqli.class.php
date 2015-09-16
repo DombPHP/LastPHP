@@ -47,7 +47,7 @@ class MultiMysqli extends Mysqli {
 	 * @var string
 	 */
 	private $links = array();
-	private $current_host_name = '';
+	protected $global_conf = '';
 	
 	/**
 	 * 静态类实例
@@ -56,7 +56,11 @@ class MultiMysqli extends Mysqli {
 	 * @var MultiMysqli
 	 */
 	private static $instance;
-		
+	
+	public function __construct($conf) {
+		parent::__construct($conf);
+	}
+	
 	/**
 	 * 获取类实例
 	 *
@@ -64,7 +68,7 @@ class MultiMysqli extends Mysqli {
 	 * @param array $conf 配置参数
 	 * @return MultiMysqli
 	 */
-	public static function getInstance(&$conf) {
+	public static function getInstance($conf = null) {
 		if(self::$instance && self::$instance instanceof self) {
 			return self::$instance;
 		} else {
@@ -80,20 +84,25 @@ class MultiMysqli extends Mysqli {
 	 * @param array $conf 配置参数
 	 * @return array
 	 */
-	protected function checkHost($conf, $host = null) {
+	protected function checkHost($host = null) {
 		$_conf = array();
-		$index = '_'.substr($host, 8);
-		if(isset($conf[$host])) {
-			$_conf['db_host']      = $conf['db_host'.$index];
-			$_conf['db_port']      = $conf['db_port'.$index];
-			$_conf['db_name']      = $conf['db_name'.$index];
-			$_conf['db_user']      = $conf['db_user'.$index];
-			$_conf['db_pwd']       = $conf['db_pwd'.$index];
-			$_conf['db_charset']   = $conf['db_charset'.$index];
-			$_conf['db_prefix']    = $conf['db_prefix'.$index];
+		if(is_numeric($host)) {
+			$index = '_'.$host;
+			$host = 'db_host'.$index;
 		} else {
-			throw  new Exception('Server \''.$host.'\' not found');
-		}print_r($_conf);
+			$index = $host=='db_host' ? '' : '_'.substr($host, 8);
+		}
+		if(isset($this->global_conf[$host])) {
+			$_conf['db_host']      = $this->global_conf['db_host'.$index];
+			$_conf['db_port']      = $this->global_conf['db_port'.$index];
+			$_conf['db_name']      = $this->global_conf['db_name'.$index];
+			$_conf['db_user']      = $this->global_conf['db_user'.$index];
+			$_conf['db_pwd']       = $this->global_conf['db_pwd'.$index];
+			$_conf['db_charset']   = $this->global_conf['db_charset'.$index];
+			$_conf['db_prefix']    = $this->global_conf['db_prefix'.$index];
+		} else {
+			throw  new \Exception('Server \''.$host.'\' not found');
+		}
 		return $_conf;
 	}
 	
@@ -105,33 +114,27 @@ class MultiMysqli extends Mysqli {
 	 * @return void
 	 */
 	public function multiConnect($conf) {
-		if(is_string($conf)) {
-			$conf = $this->checkHost($this->global_conf, $conf);
+		if(!is_array($conf)) {
+			$conf = $this->checkHost($conf);
 		}
 		$no = md5(serialize($conf));
 		if(isset($this->links[$no])) {
 			$this->link = $this->links[$no];
-			return $this->links[$no];
 		} else {
-			$this->link = $this->connect($conf);
+			$this->link = $this->getConnection($conf);
 			$this->links[$no] = $this->link;
 		}
 	}
 	
 	/**
-	 * 执行查询语句
+	 * 数据库连接方法
 	 *
-	 * @access private
-	 * @param string $sql 查询语句
-	 * @return mixed
+	 * @access public
+	 * @param array 配置参数
+	 * @return void
 	 */
-	protected function _query($sql) {
-		$this->multiConnect($this->conf);
-		$result = $this->link->query($sql);
-		if($this->link->errno) {
-			trigger_error($this->link->error.'; SQL:'.$sql);
-		}
-		return $result;
+	public function connect($conf) {
+		$this->multiConnect($conf);
 	}
 	
 	/**

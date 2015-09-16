@@ -79,7 +79,7 @@ class Mysqli {
 	 * @param array $conf 数据库配置参数
 	 * @return void
 	 */
-	public function __construct(&$conf = null) {
+	public function __construct($conf = null) {
 		$this->conf = $conf;
 	}
 	
@@ -90,7 +90,7 @@ class Mysqli {
 	 * @param array $conf 配置参数
 	 * @return Mysqli
 	 */
-	public static function getInstance(&$conf) {
+	public static function getInstance($conf = null) {
 		if(self::$instance && self::$instance instanceof self) {
 			return self::$instance;
 		} else {
@@ -101,7 +101,25 @@ class Mysqli {
 	
 	protected function __clone() {}
 	
+	/**
+	 * 数据库连接方法
+	 *
+	 * @access public
+	 * @param array 配置参数
+	 * @return Mysqli
+	 */
 	public function connect($conf) {
+		return $this->getConnection($conf);
+	}
+	
+	/**
+	 * 获取数据库连接
+	 *
+	 * @access public
+	 * @param array 配置参数
+	 * @return Mysqli
+	 */
+	protected function getConnection($conf) {
 		$host       = $conf['db_host'];
 		$port       = $conf['db_port'];
 		$db         = $conf['db_name'];
@@ -171,9 +189,13 @@ class Mysqli {
 		$this->connect($this->conf);		
 		$result = $this->link->query($sql);
 		if($this->link->errno) {
-			trigger_error($this->link->error.'; SQL:'.$sql);
+			trigger_error($this->link->error.'; \nSQL:'.$sql);
 		}
 		return $result;
+	}
+	
+	protected function _load_conf() {
+		include 'conf.php';
 	}
 	
 	/**

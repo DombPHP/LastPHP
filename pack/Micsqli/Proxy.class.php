@@ -40,6 +40,12 @@ namespace Micsqli;
  * 数据库代理类
  */
 class Proxy extends MultiMysqli {
+	
+	/**
+	 *
+	 */
+	private $master = '';
+	private $slave = '';
 	/**
 	 * 主数据库配置参数
 	 *
@@ -64,9 +70,9 @@ class Proxy extends MultiMysqli {
 	 */
 	private static $instance;
 	
-	public function __construct($conf) {
-		$this->checkddb($conf);
+	public function __construct($conf = null) {
 		parent::__construct($conf);
+		$this->checkddb();
 	}
 	
 	/**
@@ -76,7 +82,7 @@ class Proxy extends MultiMysqli {
 	 * @param array $conf 配置参数
 	 * @return Proxy
 	 */
-	public static function getInstance(&$conf) {
+	public static function getInstance($conf = null) {
 		if(self::$instance && self::$instance instanceof self) {
 			return self::$instance;
 		} else {
@@ -92,19 +98,19 @@ class Proxy extends MultiMysqli {
 	 * @param array $conf 配置参数
 	 * @return void
 	 */
-	protected function checkddb($conf) {
-		$ddb = isset($conf['ddb']) ? $conf['ddb'] : 0;
-		$proxy = isset($conf['proxy']) ? $conf['proxy'] : 0;
-		if($ddb==1) {
+	protected function checkddb() {
+		$ddb = isset($this->global_conf['ddb']) ? $this->global_conf['ddb'] : 0;
+		$proxy = isset($this->global_conf['proxy']) ? $this->global_conf['proxy'] : 0;
+		if(empty($this->conf) && $ddb==1) {
 			if($proxy==1) {
-				$this->master = $this->master ? $this->master : isset($conf['master']) ? $conf['master'] : 'db_host_master';
-				$this->slave  = $this->slave ? $this->slave : $this->getServer($conf);
-				$this->master_conf = $this->checkHost($conf, $this->master);
-				$this->slave_conf  = $this->checkHost($conf, $this->slave);
+				$this->master = $this->master ? $this->master : isset($this->global_conf['master']) ? $this->global_conf['master'] : 'db_host_master';
+				$this->slave  = $this->slave ? $this->slave : $this->getServer();
+				$this->master_conf = $this->checkHost($this->master);
+				$this->slave_conf  = $this->checkHost($this->slave);
 			} else {
-				$this->slave  = $this->getServer($conf, 'servers');
+				$this->slave  = $this->getServer('servers');
 				$this->master = $this->slave;
-				$this->master_conf = $this->checkHost($conf, $this->master);
+				$this->master_conf = $this->checkHost($this->master);
 				$this->slave_conf  = $this->master_conf;
 			}
 		}
@@ -118,8 +124,8 @@ class Proxy extends MultiMysqli {
 	 * @param string $flag 标识
 	 * @return void
 	 */
-	protected function getServer($conf) {
-		$servers = isset($conf[$flag]) && $conf[$flag] ? $conf[$flag] : null;
+	protected function getServer($flag = 'slaves') {
+		$servers = isset($this->global_conf[$flag]) && $this->global_conf[$flag] ? $this->global_conf[$flag] : null;
 		if($servers) {
 			$servers = explode(',', $servers);
 			$count = count($servers);

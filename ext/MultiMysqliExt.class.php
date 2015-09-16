@@ -80,4 +80,19 @@ class MultiMysqliExt extends \Micsqli\MultiMysqli {
 			return self::$instance;
 		}
 	}
+	
+	/**
+	 * 加载网站配置参数
+	 *
+	 * @static
+	 * @access private
+	 * @return array
+	 */
+	private function load_site_conf() {
+		$conf_path = SCRIPT_PATH.'/conf/hosts.php';
+		if(is_file($conf_path)) {
+			return array_change_key_case(parse_ini_file($conf_path, true), CASE_LOWER);
+		}
+		return array();
+	}
 }
