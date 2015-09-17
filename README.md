@@ -2,14 +2,16 @@
 An open source web application development framework for PHP.
 
 ##获取
-	项目网址 https://github.com/DombPHP/WarmerPHP
-	GIT克隆  https://github.com/DombPHP/WarmerPHP.git
+	* 项目网址 https://github.com/DombPHP/WarmerPHP
+	* GIT克隆  https://github.com/DombPHP/WarmerPHP.git
 ## 安装
 	将WarmerPHP源码置于网站根目录或站点外任意目录，
 	然后在网站入口文件(index.php)中引用框架根目录中的warmer.php文件。
 	index.php：
+	'''php
 	defined('PROJECT', 'home'); // 指定项目名称为home
 	include "../WarmerPHP/warmer.php";
+	'''
 ## 站点结构（demo），
 	WarmerPHP (框架目录)
 	demo （站点根目录）
@@ -44,7 +46,7 @@ An open source web application development framework for PHP.
     项目目录建好后，在项目控制器目录（controller）中新建IndexController.class.php控制器类，并实现index方法，
 	class IndexController extends Controoler {
 	    public function index() {
-		    echo 'Hello world!';
+		    echo 'Hello world';
 		}
 	}
 	在浏览器地址栏输入http://网址/index.php访问站点，若输出“Hello world”，则说明站点创建成功。
