@@ -47,6 +47,13 @@ class MultiMysqli extends Mysqli {
 	 * @var string
 	 */
 	private $links = array();
+	
+	/**
+	 * 全局配置参数
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $global_conf = '';
 	
 	/**
@@ -114,8 +121,12 @@ class MultiMysqli extends Mysqli {
 	 * @return void
 	 */
 	public function multiConnect($conf) {
-		if(!is_array($conf)) {
-			$conf = $this->checkHost($conf);
+		if(empty($conf)) {
+			$conf = $this->checkHost('db_host');
+		} else {
+			if(!is_array($conf)) {
+				$conf = $this->checkHost($conf);
+			}
 		}
 		$no = md5(serialize($conf));
 		if(isset($this->links[$no])) {

@@ -42,10 +42,21 @@ namespace Micsqli;
 class Proxy extends MultiMysqli {
 	
 	/**
+	 * 主数据库配置项名称
 	 *
+	 * @access private
+	 * @var string
 	 */
 	private $master = '';
+	
+	/**
+	 * 从数据库配置项名称
+	 *
+	 * @access private
+	 * @var string
+	 */
 	private $slave = '';
+	
 	/**
 	 * 主数据库配置参数
 	 *

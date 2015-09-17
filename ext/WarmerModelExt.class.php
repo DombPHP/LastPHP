@@ -46,6 +46,6 @@ class WarmerModelExt extends WarmerModel {
 
 	public function __construct() {
 		$this->db = ProxyExt::getInstance($this->host);
-		parent::__construct($GLOBALS['CONF']);
+		parent::__construct();
 	}
 }
